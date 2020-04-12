@@ -1,8 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -267,7 +266,7 @@ func outputChildren(nodes []*Fileinfo, output *string) {
 	}
 }
 
-func dirTree(out *bytes.Buffer, path string, printFiles bool) error {
+func dirTree(out io.Writer, path string, printFiles bool) error {
 	PathList := getPathList(path, printFiles)
 	PathList.sortPaths().detectRelativeNodes().defineNeighborhoods().generateNodeOutputs()
 
@@ -286,17 +285,18 @@ func dirTree(out *bytes.Buffer, path string, printFiles bool) error {
 	outputChildren(filteredTree, &output)
 	out.Write([]byte(output))
 
-	fmt.Println(output)
+	//fmt.Println(output)
 	return nil
 }
 
 func main() {
-	out := new(bytes.Buffer)
+	out := os.Stdout
 	if !(len(os.Args) == 2 || len(os.Args) == 3) {
 		panic("usage go run main.go . [-f]")
 	}
 	path := os.Args[1]
 	printFiles := len(os.Args) == 3 && os.Args[2] == "-f"
+
 	err := dirTree(out, path, printFiles)
 	if err != nil {
 		panic(err.Error())
